@@ -2,58 +2,11 @@ import Foundation
 import SwiftUI
 import Observation
 
-@Observable
-class DirectoryObserver {
-    var url: URL? {
-        didSet {
-            read()
-        }
-    }
-    init() {
-        self.url = url
-    }
-    var files: [String] = []
-    var dispatchSource: Any?
-
-    func setupDispatchSource() {
-        // not very efficient, recreating dispatch source on any change
-        guard let url = self.url else {
-            self.dispatchSource = nil
-            return
-        }
-        let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: Int32(open(url.path, O_RDONLY)), eventMask: [.all])
-        dispatchSource.setEventHandler { [unowned self] in
-            self.read()
-        }
-        dispatchSource.resume()
-        self.dispatchSource = dispatchSource
-    }
-
-    func read() {
-        guard let url = self.url else {
-            files = []
-            return
-        }
-        setupDispatchSource()
-        let fm = FileManager.default
-        do {
-            let newContents = try fm.contentsOfDirectory(atPath: url.path)
-            if newContents != files {
-                files = newContents
-            }
-        } catch {
-            DispatchQueue.main.async {
-                log("\(error)")
-            }
-        }
-    }
-}
-
-
+/// Reads the contents of the current directory
 public struct ReadDir<Contents: View>: View {
     var name: String?
     var contents: ([String]) -> Contents
-    @State private var observer = DirectoryObserver()
+    @State private var observer = FSObserver()
     @Environment(\.inputURL) var inputURL: URL
     public init(name: String? = nil, @ViewBuilder contents: @escaping ([String]) -> Contents) {
         self.name = name

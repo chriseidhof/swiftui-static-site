@@ -22,7 +22,7 @@ let package = Package(
         .target(name: "Example", dependencies: ["SwiftUISSG"]),
         .testTarget(
             name: "SwiftUISSGTests",
-            dependencies: ["SwiftUISSG"]
+            dependencies: ["SwiftUISSG", "Example"]
         ),
     ]
 )

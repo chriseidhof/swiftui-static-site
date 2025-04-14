@@ -1,8 +1,10 @@
 import SwiftUI
 import SwiftUISSG
 
-struct Example: View {
-    var body: some View {
+public struct Example: View {
+    public init() { }
+    
+    public var body: some View {
         Write("Hello, world", to: "index.html")
         ReadFile(name: "input.txt") { contents in
             Write(contents, to: "input.html")

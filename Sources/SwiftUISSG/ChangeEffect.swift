@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct ChangeEffectModifier<Value: Equatable>: ViewModifier {
     var value: Value
     @State var visible: Bool = false

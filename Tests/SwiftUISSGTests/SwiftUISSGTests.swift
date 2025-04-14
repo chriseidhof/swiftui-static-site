@@ -1,6 +1,12 @@
 import Testing
+import Foundation
+import Example
 @testable import SwiftUISSG
 
+@MainActor
 @Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    let base = URL.temporaryDirectory
+    let out = base.appendingPathComponent("_out")
+    let view = Example().staticSite(inputURL: base, outputURL: out)
+    // todo
 }
