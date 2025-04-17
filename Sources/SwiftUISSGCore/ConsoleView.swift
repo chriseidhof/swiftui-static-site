@@ -20,6 +20,7 @@ class Log {
 
 @MainActor
 public func log(_ message: String, views: AnyView? = nil) {
+    print(message)
     Log.global.entries.append(.init(message: AnyView(HStack {
         Text(message)
         views

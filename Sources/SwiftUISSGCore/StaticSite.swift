@@ -16,8 +16,8 @@ public struct StaticSite: ViewModifier {
 
     public func body(content: Content) -> some View {
         VStack(alignment: .leading) {
-            Link("Base URL", destination: inputURL)
-            Link("Output URL", destination: outputURL)
+//            Link("Base URL", destination: inputURL)
+//            Link("Output URL", destination: outputURL)
             content
                 .frame(maxWidth: .infinity)
                 .labeledContentStyle(MyLabelStyle())

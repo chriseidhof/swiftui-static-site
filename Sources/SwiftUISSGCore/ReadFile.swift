@@ -10,9 +10,18 @@ public struct ReadFile<Contents: View>: View {
         self.contents = contents
     }
 
+    var theData: Data {
+        guard let d = observer.data else {
+            print("No such file: \(name) (\(inputURL))")
+            return Data()
+        }
+        return d
+    }
+
     public var body: some View {
+        let _ = print("ReadFile body", name)
         LabeledContent(content: {
-            contents(observer.data!)
+            contents(theData)
         }, label: {
             Text("Read \(name)")
         })

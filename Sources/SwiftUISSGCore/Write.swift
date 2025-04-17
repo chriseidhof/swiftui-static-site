@@ -1,8 +1,13 @@
 import SwiftUI
 import Foundation
 
+extension EnvironmentValues {
+    @Entry var cleanup = true
+}
+
 public struct Write: View {
     @Environment(\.outputURL) private var outputURL: URL
+    @Environment(\.cleanup) private var cleanup
 
     public init(_ contents: String, to: String) {
         self.payload = .init(contents: contents.data(using: .utf8)!, to: to)
@@ -29,17 +34,18 @@ public struct Write: View {
             Text("\(payload.to)")
         }
         .changeEffect(trigger: payload)
-            .task(id: payload) {
+        .onChange(of: payload, initial: true) {
                 let dir = result.deletingLastPathComponent()
                 let fm = FileManager.default
                 if !fm.fileExists(atPath: dir.path()) {
                     try! fm.createDirectory(at: dir, withIntermediateDirectories: true)
                 }
-                log("Write \(payload.to)")
+                log("Write \(result)")
                 try! payload.contents.write(to: result)
             }
             .onDisappear {
                 do {
+                    guard cleanup else { return }
                     let fm = FileManager.default
                     try fm.removeItem(atPath: result.path())
                     log("Remove \(payload.to)")

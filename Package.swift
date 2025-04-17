@@ -11,18 +11,31 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
+            name: "SwiftUISSGCore",
+            targets: ["SwiftUISSGCore"]),
+        .library(
             name: "SwiftUISSG",
             targets: ["SwiftUISSG"]),
         .library(name: "Example", targets: ["Example"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/robb/Swim.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-markdown", branch: "main"),
+    ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(name: "SwiftUISSG"),
+        .target(name: "SwiftUISSG", dependencies: [
+            "SwiftUISSGCore",
+            .product(name: "HTML", package: "Swim"),
+            .product(name: "Swim", package: "Swim"),
+            .product(name: "Markdown", package: "swift-markdown"),
+        ]),
+        .target(name: "SwiftUISSGCore", dependencies: [
+            // SwiftUI
+        ]),
         .target(name: "Example", dependencies: ["SwiftUISSG"]),
         .testTarget(
             name: "SwiftUISSGTests",
-            dependencies: ["SwiftUISSG", "Example"]
+            dependencies: ["SwiftUISSGCore", "Example"]
         ),
     ]
 )

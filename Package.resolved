@@ -1,0 +1,33 @@
+{
+  "originHash" : "685403cdf5aac0c26a5a1bcdae205ee8fba06c80cf66ca108193bc791e2ce8d8",
+  "pins" : [
+    {
+      "identity" : "swift-cmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-cmark.git",
+      "state" : {
+        "branch" : "gfm",
+        "revision" : "b97d09472e847a416629f026eceae0e2afcfad65"
+      }
+    },
+    {
+      "identity" : "swift-markdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-markdown",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e62a44fd1f2764ba8807db3b6f257627449bbb8c"
+      }
+    },
+    {
+      "identity" : "swim",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/robb/Swim.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "d3dde8cf781507ada3b7549996bea94f8d57181f"
+      }
+    }
+  ],
+  "version" : 3
+}

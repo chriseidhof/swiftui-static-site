@@ -1,6 +1,12 @@
 import SwiftUI
 import SwiftUISSG
 
+extension String {
+    var baseName: String {
+        .init(split(separator: ".")[0])
+    }
+}
+
 public struct Example: View {
     public init() { }
     
@@ -10,10 +16,10 @@ public struct Example: View {
             Write(contents, to: "input.html")
         }
         ReadDir() { files in
-            Write(files.joined(separator: "\n"), to: "posts.html")
+            Write(files.joined(separator: "\n"), to: "index.html")
             ForEach(files, id: \.self) { name in
                 ReadFile(name: name) { contents in
-                    Write(contents, to: name)
+                    Write(contents, to: name.baseName + ".html")
                 }
             }
         }
