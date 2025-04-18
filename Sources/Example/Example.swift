@@ -7,6 +7,15 @@ extension String {
     }
 }
 
+
+struct PostIndex: View {
+    var files: [String] = []
+    var body: some View {
+        let str = files.map { "* \($0)"}.joined(separator: "\n")
+        Write(str.markdown().data, to: "index.html")
+    }
+}
+
 public struct Example: View {
     public init() { }
     
@@ -16,7 +25,7 @@ public struct Example: View {
             Write(contents, to: "input.html")
         }
         ReadDir() { files in
-            Write(files.joined(separator: "\n"), to: "index.html")
+            PostIndex(files: files)
             ForEach(files, id: \.self) { name in
                 ReadFile(name: name) { contents in
                     Write(String(decoding: contents, as: UTF8.self).markdown().data, to: name.baseName + ".html")

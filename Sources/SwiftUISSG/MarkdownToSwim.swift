@@ -44,7 +44,7 @@ struct HTMLBuilder: MarkupVisitor {
 
 
     func visitText(_ text: Markdown.Text) -> Node {
-        text.string.asNode()
+        %text.string.asNode()
     }
 
     func visitLineBreak(_ lineBreak: LineBreak) -> Node{
@@ -57,11 +57,11 @@ struct HTMLBuilder: MarkupVisitor {
     }
 
     mutating func visitEmphasis(_ emphasis: Emphasis) -> Node {
-        %HTML.em { visit(emphasis.children) }
+        %HTML.em { %visit(emphasis.children) }
     }
 
     mutating func visitStrong(_ strong: Strong) -> Node {
-        %HTML.strong { visit(strong.children) }
+        %HTML.strong { %visit(strong.children) }
     }
     func visitCustomInline(_ customInline: CustomInline) -> Node {
         customInline.text.asNode()
@@ -82,11 +82,11 @@ struct HTMLBuilder: MarkupVisitor {
     }
 
     mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> Node {
-        ul { visit(unorderedList.children) }
+        %ul { %visit(unorderedList.children) }
     }
 
     mutating func visitListItem(_ listItem: ListItem) -> Node {
-        li { visit(listItem.children) }
+        %li { %visit(listItem.children) }
     }
 
     mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Node {
@@ -123,7 +123,7 @@ struct HTMLBuilder: MarkupVisitor {
     }
 
     mutating func visitParagraph(_ paragraph: Paragraph) -> Node {
-        p { visit(paragraph.children) }
+        %p { visit(paragraph.children) }
     }
 
     func visitThematicBreak(_ thematicBreak: ThematicBreak) -> Node {

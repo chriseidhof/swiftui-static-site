@@ -100,9 +100,28 @@ extension Tree {
         }.map { (l, r) in
             let left = String(decoding: l.value, as: UTF8.self)
             let right = String(decoding: r.value, as: UTF8.self)
-            return "\(l.key): \(left) != \(right)"
+            return "\(l.key):\n\(left.diff(other: right))"
         }
         return changedKeys.joined(separator: "\n\n---\n\n")
+    }
+}
+
+extension String {
+    // git-like diff
+    func diff(other: String) -> String {
+        let lines = self.split(separator: "\n")
+        let otherLines = other.split(separator: "\n")
+        let diff = lines.difference(from: otherLines)
+        let result: [String] = diff.map { change -> String in
+            switch change {
+
+            case .insert(offset: let offset, element: let element, associatedWith: let associatedWith):
+                return "+[\(offset)]: \(String(element))"
+            case .remove(offset: let offset, element: let element, associatedWith: let associatedWith):
+                return "-[\(offset)]: \(String(element))"
+            }
+        }
+        return result.joined(separator: "\n")
     }
 }
 
@@ -115,6 +134,7 @@ extension Tree {
         "input.txt": "Input file",
         "posts": Tree.directory([
             "post0.md": "# Post 0",
+            "post1.md": "**Post 1**",
         ]),
     ])
     try input.write(to: base)
@@ -126,14 +146,24 @@ extension Tree {
     hostingView.layoutSubtreeIfNeeded()
     try await Task.sleep(for: .seconds(0.1))
     let outputTree = try Tree.read(from: out)
+    let postIndex =
+    """
+    <ul><li><p>post0.md
+    \t\t</p>
+    \t</li><li><p>post1.md
+    \t\t</p>
+    \t</li>
+    </ul>
+    """
     let expected: Tree = .directory([
         "input.html": "Input file",
         "index.html": "Hello, world",
         "posts": Tree.directory([
-            "index.html": "post0.md",
-            "post0.html": "<h1>Post 0\n</h1>"
+            "index.html": .file(postIndex.data(using: .utf8)!),
+            "post0.html": "<h1>Post 0\n</h1>",
+            "post1.html": "<p><strong>Post 1</strong>\n</p>",
          ])
     ])
-    #expect(outputTree == expected, "Expected no diff, got \(outputTree.diff(expected))")
+    #expect(outputTree == expected, "Expected no diff, got \n\(outputTree.diff(expected))")
 
 }
