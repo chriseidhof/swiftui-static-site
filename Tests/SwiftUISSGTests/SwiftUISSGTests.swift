@@ -24,7 +24,7 @@ extension Tree: CustomStringConvertible {
                 "\(indent)\(value.pretty(indent: indent + "  "))"
             }.joined(separator: "\n")
         case .file(let d):
-            return String(decoding: d, as: UTF8.self)
+            return "\"\(String(decoding: d, as: UTF8.self))\""
         }
     }
 
@@ -58,6 +58,7 @@ extension Tree {
         if isDir.boolValue {
             // read dir
             let contents = try fm.contentsOfDirectory(atPath: from.path())
+                .filter { !$0.hasPrefix(".") }
             return .directory(.init(uniqueKeysWithValues: try contents.map {
                 try ($0, .read(from: from.appendingPathComponent($0)))
             }))
@@ -65,6 +66,42 @@ extension Tree {
         } else {
             return try .file(Data(contentsOf: from))
         }
+    }
+}
+
+extension Tree {
+    func flattenHelper(into: inout [String: Data], prefix: [String]) {
+        switch self {
+        case .file(let data):
+            into[prefix.joined(separator: "/")] = data
+        case .directory(let dictionary):
+            for (key, value) in dictionary {
+                value.flattenHelper(into: &into, prefix: prefix + [key])
+            }
+        }
+    }
+
+    func flatten() -> [String: Data] {
+        var result: [String: Data] = [:]
+        flattenHelper(into: &result, prefix: [])
+        return result
+    }
+
+    func diff(_ other: Tree) -> String {
+        let src = flatten().sorted { $0.key < $1.key }
+        let otherFlat = other.flatten()
+        let dst = otherFlat.sorted { $0.key < $1.key }
+        let keysDiff = dst.map(\.key).difference(from: src.map(\.key))
+        guard keysDiff.isEmpty else {
+            return (keysDiff.removals.map { "Removed: \($0)" } + keysDiff.insertions.map { "Added: \($0)" }).joined(separator: "\n")
+        }
+        return """
+        \(src)
+        
+        !=
+        
+        \(dst)
+        """
     }
 }
 
@@ -88,13 +125,14 @@ extension Tree {
     hostingView.layoutSubtreeIfNeeded()
     try await Task.sleep(for: .seconds(0.1))
     let outputTree = try Tree.read(from: out)
-    #expect(outputTree == .directory([
+    let expected: Tree = .directory([
         "input.html": "Input file",
         "index.html": "Hello, world",
         "posts": Tree.directory([
             "index.html": "post0.md",
-            "post0.md": "# Post 0"
+            "post0.html": "# Post 0"
          ])
-    ]))
+    ])
+    #expect(outputTree == expected, "\(outputTree.diff(expected))")
 
 }
