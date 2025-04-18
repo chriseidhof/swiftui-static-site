@@ -19,7 +19,7 @@ public struct Example: View {
             Write(files.joined(separator: "\n"), to: "index.html")
             ForEach(files, id: \.self) { name in
                 ReadFile(name: name) { contents in
-                    Write(contents, to: name.baseName + ".html")
+                    Write(String(decoding: contents, as: UTF8.self).markdown().data, to: name.baseName + ".html")
                 }
             }
         }

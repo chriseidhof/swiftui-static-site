@@ -95,13 +95,14 @@ extension Tree {
         guard keysDiff.isEmpty else {
             return (keysDiff.removals.map { "Removed: \($0)" } + keysDiff.insertions.map { "Added: \($0)" }).joined(separator: "\n")
         }
-        return """
-        \(src)
-        
-        !=
-        
-        \(dst)
-        """
+        let changedKeys = zip(src, dst).filter {
+            $0.1.value != $0.0.value
+        }.map { (l, r) in
+            let left = String(decoding: l.value, as: UTF8.self)
+            let right = String(decoding: r.value, as: UTF8.self)
+            return "\(l.key): \(left) != \(right)"
+        }
+        return changedKeys.joined(separator: "\n\n---\n\n")
     }
 }
 
@@ -130,9 +131,9 @@ extension Tree {
         "index.html": "Hello, world",
         "posts": Tree.directory([
             "index.html": "post0.md",
-            "post0.html": "# Post 0"
+            "post0.html": "<h1>Post 0\n</h1>"
          ])
     ])
-    #expect(outputTree == expected, "\(outputTree.diff(expected))")
+    #expect(outputTree == expected, "Expected no diff, got \(outputTree.diff(expected))")
 
 }

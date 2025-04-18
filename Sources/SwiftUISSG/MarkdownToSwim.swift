@@ -22,6 +22,13 @@ extension String {
         Document(parsing: self).toNode()
     }
 }
+extension Node {
+    public var data: Data {
+        var result = ""
+        self.write(to: &result)
+        return result.data(using: .utf8)!
+    }
+}
 
 // todo should this be a visitor?
 struct HTMLBuilder: MarkupVisitor {
@@ -104,14 +111,14 @@ struct HTMLBuilder: MarkupVisitor {
     }
 
     mutating func visitHeading(_ heading: Heading) -> Node {
-        let text = visit(heading.children)
+        let text = %visit(heading.children)
         switch heading.level {
-        case 1: return h1 { text }
-        case 2: return h2 { text }
-        case 3: return h3 { text }
-        case 4: return h4 { text }
-        case 5: return h5 { text }
-        default: return h6 { text }
+        case 1: return %h1 { text }
+        case 2: return %h2 { text }
+        case 3: return %h3 { text }
+        case 4: return %h4 { text }
+        case 5: return %h5 { text }
+        default: return %h6 { text }
         }
     }
 
