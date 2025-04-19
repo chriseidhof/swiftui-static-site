@@ -27,11 +27,9 @@ import SwiftUI
     let outputTree = try Tree.read(from: out)
     let postIndex =
     """
-    <ul><li><p>post0.md
-    \t\t</p>
-    \t</li><li><p>post1.md
-    \t\t</p>
-    \t</li>
+    <ul>
+    \t<li><p>post0.md</p></li>
+    \t<li><p>post1.md</p></li>
     </ul>
     """
     let expected: Tree = .directory([
@@ -40,20 +38,14 @@ import SwiftUI
         "posts": Tree.directory([
             "index.html": .file(postIndex.data(using: .utf8)!),
             "post1.html": """
-            <h1>
-            \tBlog
-            </h1>
-            <article><p><strong>Post 1</strong>
-            \t</p>
+            <h1>Blog</h1>
+            <article>
+            \t<p><strong>Post 1</strong></p>
             </article>
             """,
             "post0.html": """
-            <h1>
-            \tBlog
-            </h1>
-            <article><h1>Post 0
-            \t</h1>
-            </article>
+            <h1>Blog</h1>
+            <article><h1>Post 0</h1></article>
             """
          ])
     ])

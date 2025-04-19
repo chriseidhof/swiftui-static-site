@@ -36,7 +36,7 @@ import HTML
 struct BlogTemplate: Template {
     @NodeBuilder
     func run(content: Node) -> Node {
-        %h1 { "Blog" }
+        h1 { %"Blog"% }
         article { content }
     }
 }

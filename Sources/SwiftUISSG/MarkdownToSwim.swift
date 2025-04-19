@@ -44,7 +44,7 @@ struct HTMLBuilder: MarkupVisitor {
 
 
     func visitText(_ text: Markdown.Text) -> Node {
-        %text.string.asNode()
+        %text.string.asNode()%
     }
 
     func visitLineBreak(_ lineBreak: LineBreak) -> Node{
@@ -82,11 +82,11 @@ struct HTMLBuilder: MarkupVisitor {
     }
 
     mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> Node {
-        %ul { %visit(unorderedList.children) }
+        ul { visit(unorderedList.children) }
     }
 
     mutating func visitListItem(_ listItem: ListItem) -> Node {
-        %li { %visit(listItem.children) }
+        li { %visit(listItem.children)% }
     }
 
     mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Node {
@@ -111,19 +111,19 @@ struct HTMLBuilder: MarkupVisitor {
     }
 
     mutating func visitHeading(_ heading: Heading) -> Node {
-        let text = %visit(heading.children)
+        let text = %visit(heading.children)%
         switch heading.level {
-        case 1: return %h1 { text }
-        case 2: return %h2 { text }
-        case 3: return %h3 { text }
-        case 4: return %h4 { text }
-        case 5: return %h5 { text }
-        default: return %h6 { text }
+        case 1: return %h1 { text }%
+        case 2: return %h2 { text }%
+        case 3: return %h3 { text }%
+        case 4: return %h4 { text }%
+        case 5: return %h5 { text }%
+        default: return %h6 { text }%
         }
     }
 
     mutating func visitParagraph(_ paragraph: Paragraph) -> Node {
-        %p { visit(paragraph.children) }
+        p { %visit(paragraph.children)% }
     }
 
     func visitThematicBreak(_ thematicBreak: ThematicBreak) -> Node {
