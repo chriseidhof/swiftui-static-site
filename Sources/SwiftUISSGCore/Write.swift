@@ -9,11 +9,11 @@ public struct Write: View {
     @Environment(\.outputURL) private var outputURL: URL
     @Environment(\.cleanup) private var cleanup
 
-    public init(_ contents: String, to: String) {
+    public init(to: String, _ contents: String) {
         self.payload = .init(contents: contents.data(using: .utf8)!, to: to)
     }
     
-    public init(_ contents: Data, to: String) {
+    public init(to: String, _ contents: Data) {
         self.payload = .init(contents: contents, to: to)
     }
 

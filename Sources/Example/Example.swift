@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftUISSG
+import Swim
 
 extension String {
     var baseName: String {
@@ -12,7 +13,22 @@ struct PostIndex: View {
     var files: [String] = []
     var body: some View {
         let str = files.map { "* \($0)"}.joined(separator: "\n")
-        Write(str.markdown().data, to: "index.html")
+        Write(to: "index.html", str.markdown().data)
+    }
+}
+
+struct Blog: View {
+    var body: some View {
+        ReadDir() { files in
+            PostIndex(files: files)
+            ForEach(files, id: \.self) { name in
+                ReadFile(name: name) { contents in
+                    WriteNode(name.baseName + ".html") {
+                        String(decoding: contents, as: UTF8.self).markdown()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -20,18 +36,11 @@ public struct Example: View {
     public init() { }
     
     public var body: some View {
-        Write("Hello, world", to: "index.html")
+        Write(to: "index.html", "Hello, world")
         ReadFile(name: "input.txt") { contents in
-            Write(contents, to: "input.html")
+            Write(to: "input.html", contents)
         }
-        ReadDir() { files in
-            PostIndex(files: files)
-            ForEach(files, id: \.self) { name in
-                ReadFile(name: name) { contents in
-                    Write(String(decoding: contents, as: UTF8.self).markdown().data, to: name.baseName + ".html")
-                }
-            }
-        }
-        .dir("posts")
+        Blog()
+            .dir("posts")
     }
 }
