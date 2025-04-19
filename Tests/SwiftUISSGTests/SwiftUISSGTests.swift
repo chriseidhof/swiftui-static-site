@@ -39,8 +39,22 @@ import SwiftUI
         "index.html": "Hello, world",
         "posts": Tree.directory([
             "index.html": .file(postIndex.data(using: .utf8)!),
-            "post0.html": "<h1>Post 0\n</h1>",
-            "post1.html": "<p><strong>Post 1</strong>\n</p>",
+            "post1.html": """
+            <h1>
+            \tBlog
+            </h1>
+            <article><p><strong>Post 1</strong>
+            \t</p>
+            </article>
+            """,
+            "post0.html": """
+            <h1>
+            \tBlog
+            </h1>
+            <article><h1>Post 0
+            \t</h1>
+            </article>
+            """
          ])
     ])
     #expect(outputTree == expected, "Expected no diff, got \n\(outputTree.diff(expected))")

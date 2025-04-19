@@ -23,6 +23,12 @@ extension View {
     }
 }
 
+extension Node {
+    func apply(_ templates: [Template]) -> Node {
+        templates.reversed().reduce(self) { $1.run(content: $0) }
+    }
+}
+
 public protocol Template {
     func run(content: Node) -> Node
 }

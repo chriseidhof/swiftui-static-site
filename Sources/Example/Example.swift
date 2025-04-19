@@ -31,6 +31,16 @@ struct Blog: View {
     }
 }
 
+import HTML
+
+struct BlogTemplate: Template {
+    @NodeBuilder
+    func run(content: Node) -> Node {
+        %h1 { "Blog" }
+        article { content }
+    }
+}
+
 public struct Example: View {
     public init() { }
     
@@ -38,6 +48,7 @@ public struct Example: View {
         Write(to: "index.html", "Hello, world")
         Copy(name: "input.txt")
         Blog()
+            .wrap(BlogTemplate())
             .dir("posts")
     }
 }

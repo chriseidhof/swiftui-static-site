@@ -3,6 +3,7 @@ import SwiftUI
 
 public struct WriteNode: View {
     @NodeBuilder var builder: Node
+    @Environment(\.template) var template
     var to: String
     public init(_ to: String, @NodeBuilder builder: () -> Node) {
         self.builder = builder()
@@ -10,6 +11,6 @@ public struct WriteNode: View {
     }
 
     public var body: some View {
-        Write(to: to, builder.data)
+        Write(to: to, builder.apply(template).data)
     }
 }
