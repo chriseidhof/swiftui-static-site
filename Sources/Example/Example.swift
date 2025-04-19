@@ -8,7 +8,6 @@ extension String {
     }
 }
 
-
 struct PostIndex: View {
     var files: [String] = []
     var body: some View {
@@ -37,9 +36,7 @@ public struct Example: View {
     
     public var body: some View {
         Write(to: "index.html", "Hello, world")
-        ReadFile(name: "input.txt") { contents in
-            Write(to: "input.html", contents)
-        }
+        Copy(name: "input.txt")
         Blog()
             .dir("posts")
     }

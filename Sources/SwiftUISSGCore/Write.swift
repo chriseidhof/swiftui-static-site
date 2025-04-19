@@ -40,7 +40,7 @@ public struct Write: View {
                 if !fm.fileExists(atPath: dir.path()) {
                     try! fm.createDirectory(at: dir, withIntermediateDirectories: true)
                 }
-                log("Write \(result)")
+                log("Write \(result) \(payload.contents)")
                 try! payload.contents.write(to: result)
             }
             .onDisappear {

@@ -8,6 +8,7 @@ import SwiftUI
 @Test func example() async throws {
     let base = URL.temporaryDirectory.appendingPathComponent("test")
     let out = base.appendingPathComponent("_out")
+    try FileManager.default.removeItem(at: out)
     let input = Tree.directory([
         "input.txt": "Input file",
         "posts": Tree.directory([
@@ -34,7 +35,7 @@ import SwiftUI
     </ul>
     """
     let expected: Tree = .directory([
-        "input.html": "Input file",
+        "input.txt": "Input file",
         "index.html": "Hello, world",
         "posts": Tree.directory([
             "index.html": .file(postIndex.data(using: .utf8)!),
