@@ -22,7 +22,7 @@ public struct ReadDir<Contents: View>: View {
         LabeledContent("Read Dir \(theName)") {
             contents(observer.files.filter { !$0.hasPrefix(".") })
         }
-        .onChange(of: theURL, initial: true) {
+        .sideEffect(trigger: theURL) {
             observer.url = theURL
         }
     }

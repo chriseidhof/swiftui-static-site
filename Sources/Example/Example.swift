@@ -30,6 +30,8 @@ struct PostIndex: View {
     }
 }
 
+// As an example, we could propagate up the titles of the blog using preferences (normally, this would be the full metadata). One of the nice things about it is that (for example) the homepage could render these without having to know everything about the blog implementation.
+
 struct BlogTitlesPreference: PreferenceKey {
     static var defaultValue: [String] { [] }
     static func reduce(value: inout [String], nextValue: () -> [String]) {

@@ -27,7 +27,7 @@ public struct ReadFile<Contents: View>: View {
         }, label: {
             Text("Read \(name)")
         })
-        .onChange(of: name, initial: true) {
+        .sideEffect(trigger: name) {
             observer.url = inputURL.appendingPathComponent(name)
             didAppear = true
         }

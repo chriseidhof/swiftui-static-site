@@ -34,7 +34,7 @@ public struct Write: View {
             Text("\(payload.to)")
         }
         .changeEffect(trigger: payload)
-        .onChange(of: payload, initial: true) {
+        .sideEffect(trigger: payload) {
                 let dir = result.deletingLastPathComponent()
                 let fm = FileManager.default
                 if !fm.fileExists(atPath: dir.path()) {
@@ -55,3 +55,4 @@ public struct Write: View {
             }
     }
 }
+
