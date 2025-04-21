@@ -1,12 +1,12 @@
 import Foundation
 
-enum Tree: Hashable {
+public enum Tree: Hashable {
     case file(Data)
     case directory([String: Tree])
 }
 
 extension Tree: ExpressibleByStringLiteral {
-    init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self = .file(value.data(using: .utf8)!)
     }
 }
@@ -24,13 +24,13 @@ extension Tree: CustomStringConvertible {
         }
     }
 
-    var description: String {
+    public var description: String {
         pretty()
     }
 }
 
 extension Tree {
-    func write(to url: URL) throws {
+    public func write(to url: URL) throws {
         switch self {
         case .file(let f):
             try f.write(to: url)
@@ -45,7 +45,7 @@ extension Tree {
         }
     }
 
-    static func read(from: URL) throws -> Tree {
+    public static func read(from: URL) throws -> Tree {
         let fm = FileManager.default
         var isDir: ObjCBool = false
         guard fm.fileExists(atPath: from.path(), isDirectory: &isDir) else {
@@ -77,13 +77,13 @@ extension Tree {
         }
     }
 
-    func flatten() -> [String: Data] {
+    public func flatten() -> [String: Data] {
         var result: [String: Data] = [:]
         flattenHelper(into: &result, prefix: [])
         return result
     }
 
-    func diff(_ other: Tree) -> String {
+    public func diff(_ other: Tree) -> String {
         let src = flatten().sorted { $0.key < $1.key }
         let otherFlat = other.flatten()
         let dst = otherFlat.sorted { $0.key < $1.key }
@@ -103,7 +103,7 @@ extension Tree {
 }
 
 extension Tree {
-    subscript(path: [String]) -> Tree {
+    public subscript(path: [String]) -> Tree {
         get {
             guard let f = path.first else {
                 return self
@@ -129,7 +129,7 @@ extension Tree {
 
 extension String {
     // TODO: git-like diff
-    func diff(other: String) -> String {
+    public func diff(other: String) -> String {
         let lines = self.split(separator: "\n")
         let otherLines = other.split(separator: "\n")
         let diff = lines.difference(from: otherLines)
