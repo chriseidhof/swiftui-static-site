@@ -20,7 +20,7 @@ public struct ReadDir<Contents: View>: View {
     public var body: some View {
         let theName = theURL.lastPathComponent
         LabeledContent("Read Dir \(theName)") {
-            contents(observer.files)
+            contents(observer.files.filter { !$0.hasPrefix(".") })
         }
         .onChange(of: theURL, initial: true) {
             observer.url = theURL

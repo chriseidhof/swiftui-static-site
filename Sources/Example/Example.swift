@@ -1,6 +1,20 @@
 import SwiftUI
 import SwiftUISSG
 import Swim
+import HTML
+
+// An example static site.
+public struct Example: View {
+    public init() { }
+
+    public var body: some View {
+        Write(to: "index.html", "Hello, world")
+        Copy(name: "input.txt")
+        Blog()
+            .wrap(BlogTemplate())
+            .dir("posts")
+    }
+}
 
 extension String {
     var baseName: String {
@@ -27,6 +41,10 @@ extension View {
     func blogPostTitle(_ title: String) -> some View {
         preference(key: BlogTitlesPreference.self, value: [title])
     }
+
+    func gatherBlogPostTitles(_ onChange: @escaping ([String]) -> Void) -> some View {
+        onPreferenceChange(BlogTitlesPreference.self, perform: onChange)
+    }
 }
 
 struct Blog: View {
@@ -45,13 +63,11 @@ struct Blog: View {
                 }
             }
         }
-        .onPreferenceChange(BlogTitlesPreference.self) {
+        .gatherBlogPostTitles {
             postTitles = $0
         }
     }
 }
-
-import HTML
 
 struct BlogTemplate: Template {
     @NodeBuilder
@@ -61,14 +77,4 @@ struct BlogTemplate: Template {
     }
 }
 
-public struct Example: View {
-    public init() { }
-    
-    public var body: some View {
-        Write(to: "index.html", "Hello, world")
-        Copy(name: "input.txt")
-        Blog()
-            .wrap(BlogTemplate())
-            .dir("posts")
-    }
-}
+

@@ -102,6 +102,31 @@ extension Tree {
     }
 }
 
+extension Tree {
+    subscript(path: [String]) -> Tree {
+        get {
+            guard let f = path.first else {
+                return self
+            }
+            guard case .directory(let dictionary) = self else {
+                fatalError()
+            }
+            return dictionary[f]![Array(path.dropFirst())]
+        }
+        set {
+            guard let f = path.first else {
+                self = newValue
+                return
+            }
+            guard case .directory(var dictionary) = self else {
+                fatalError()
+            }
+            dictionary[f]![Array(path.dropFirst())] = newValue
+            self = .directory(dictionary)
+        }
+    }
+}
+
 extension String {
     // TODO: git-like diff
     func diff(other: String) -> String {

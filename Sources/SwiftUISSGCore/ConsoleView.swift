@@ -8,6 +8,7 @@ struct LogEntry: Identifiable {
     var date: Date = .now
     var id: UUID = UUID()
     var message: AnyView
+    var _message: String
 }
 
 @Observable
@@ -24,15 +25,7 @@ public func log(_ message: String, views: AnyView? = nil) {
     Log.global.entries.append(.init(message: AnyView(HStack {
         Text(message)
         views
-    })))
-}
-
-@MainActor
-public func log(_ message: LocalizedStringKey, views: AnyView? = nil) {
-    Log.global.entries.append(.init(message: AnyView(HStack {
-        Text(message)
-        views
-    })))
+    }), _message: message))
 }
 
 public struct ConsoleView: View {

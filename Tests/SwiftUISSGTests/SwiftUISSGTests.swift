@@ -9,16 +9,18 @@ import SwiftUI
     let base = URL.temporaryDirectory.appendingPathComponent("test")
     let out = base.appendingPathComponent("_out")
     try FileManager.default.removeItem(at: out)
-    let input = Tree.directory([
+    var post0 = """
+    ---
+    The first post
+    ---
+    # Post 0
+    """
+    var post1 = "**Post 1**"
+    var input = Tree.directory([
         "input.txt": "Input file",
         "posts": Tree.directory([
-            "post0.md": """
-            ---
-            The first post
-            ---
-            # Post 0
-            """,
-            "post1.md": "**Post 1**",
+            "post0.md": .file(post0.data(using: .utf8)!),
+            "post1.md": .file(post1.data(using: .utf8)!),
         ]),
     ])
     try input.write(to: base)
@@ -56,4 +58,30 @@ import SwiftUI
     ])
     #expect(outputTree == expected, "Expected no diff, got \n\(outputTree.diff(expected))")
 
+    // Check that changing the body of post0 only causes a rewrite of post0
+    post0 += "\n\nUpdated in step 2"
+    input[["posts", "post0.md"]] = .file(post0.data(using: .utf8)!)
+    let entries0 = Log.global.entries
+    try input.write(to: base)
+    hostingView.layoutSubtreeIfNeeded()
+
+    let entries1 = Log.global.entries
+    #expect(entries1.count == entries0.count + 1)
+    #expect(entries1.last!._message == "Write post0.html")
+
+    // Check that changing the title of post1 only causes a rewrite of the blog index page.
+    post1 = """
+    ---
+    Post 1 title
+    ---
+    \(post1)
+    """
+    input[["posts", "post1.md"]] = .file(post1.data(using: .utf8)!)
+    try input.write(to: base)
+    hostingView.needsLayout = true
+    hostingView.layoutSubtreeIfNeeded()
+    try await Task.sleep(for: .seconds(0.1)) // for the preference
+    let entries2 = Log.global.entries
+    #expect(entries2.count == entries1.count + 1)
+    #expect(entries2.last!._message == "Write index.html")
 }

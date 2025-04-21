@@ -1,5 +1,5 @@
 {
-  "originHash" : "685403cdf5aac0c26a5a1bcdae205ee8fba06c80cf66ca108193bc791e2ce8d8",
+  "originHash" : "90bcc6753882d9b98013aea48431f9d23b2a4311e50993fbebf809688c063cd6",
   "pins" : [
     {
       "identity" : "swift-cmark",
@@ -26,6 +26,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "d3dde8cf781507ada3b7549996bea94f8d57181f"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "b4b8042411dc7bbb696300a34a4bf3ba1b7ad19b",
+        "version" : "5.3.1"
       }
     }
   ],
