@@ -9,24 +9,44 @@ extension String {
 }
 
 struct PostIndex: View {
-    var files: [String] = []
+    var titles: [String] = []
     var body: some View {
-        let str = files.map { "* \($0)"}.joined(separator: "\n")
+        let str = titles.map { "* \($0)"}.joined(separator: "\n")
         Write(to: "index.html", str.markdown().data)
     }
 }
 
+struct BlogTitlesPreference: PreferenceKey {
+    static var defaultValue: [String] { [] }
+    static func reduce(value: inout [String], nextValue: () -> [String]) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
+extension View {
+    func blogPostTitle(_ title: String) -> some View {
+        preference(key: BlogTitlesPreference.self, value: [title])
+    }
+}
+
 struct Blog: View {
+    @State private var postTitles: [String] = []
     var body: some View {
         ReadDir() { files in
-            PostIndex(files: files)
+            PostIndex(titles: postTitles)
             ForEach(files, id: \.self) { name in
                 ReadFile(name: name) { contents in
+                    let str = String(decoding: contents, as: UTF8.self)
+                    let (frontMatter, markdown) = str.parseWithFrontMatter()
                     WriteNode(name.baseName + ".html") {
-                        String(decoding: contents, as: UTF8.self).markdown()
+                        markdown.markdown()
                     }
+                    .blogPostTitle(frontMatter ?? name)
                 }
             }
+        }
+        .onPreferenceChange(BlogTitlesPreference.self) {
+            postTitles = $0
         }
     }
 }

@@ -12,7 +12,12 @@ import SwiftUI
     let input = Tree.directory([
         "input.txt": "Input file",
         "posts": Tree.directory([
-            "post0.md": "# Post 0",
+            "post0.md": """
+            ---
+            The first post
+            ---
+            # Post 0
+            """,
             "post1.md": "**Post 1**",
         ]),
     ])
@@ -28,7 +33,7 @@ import SwiftUI
     let postIndex =
     """
     <ul>
-    \t<li><p>post0.md</p></li>
+    \t<li><p>The first post</p></li>
     \t<li><p>post1.md</p></li>
     </ul>
     """
