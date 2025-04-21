@@ -23,6 +23,7 @@ public struct StaticSite: ViewModifier {
                 .labeledContentStyle(MyLabelStyle())
                 .environment(\.inputURL, inputURL)
                 .environment(\.outputURL, outputURL)
+                .environment(\.baseOutputURL, outputURL)
         }
     }
 }

@@ -2,6 +2,23 @@ import SwiftUI
 import SwiftUISSG
 import Example
 import Foundation
+import LiveReload
+import Swim
+
+public struct LiveReloadTemplate: Template {
+    @NodeBuilder
+    public func run(content: Node) -> Node {
+        content
+        Node.raw(liveReloadSnippet)
+    }
+}
+
+extension Template where Self == LiveReloadTemplate {
+    static public var liveReload: Self {
+        .init()
+    }
+}
+
 
 struct ContentView: View {
     @State private var didAppear = false
@@ -9,7 +26,7 @@ struct ContentView: View {
     let base = URL.temporaryDirectory.appendingPathComponent("app")
     var body: some View {
         let out = base.appendingPathComponent("_out")
-        VStack {
+        VStack(alignment: .leading) {
             if didAppear {
                 Button("Directory") {
                     NSWorkspace.shared.open(base)
@@ -17,7 +34,14 @@ struct ContentView: View {
                 Button(serverTask == nil ? "Start Server" : "Stop Server") {
                     if serverTask == nil {
                         serverTask = Task {
-                            try! await runServer(baseURL: out)
+                            await withDiscardingTaskGroup { group in
+                                group.addTask {
+                                    try! await runServer(baseURL: out)
+                                }
+                                group.addTask {
+                                    try! await liveReload()
+                                }
+                            }
                         }
                     } else {
                         serverTask = nil
@@ -26,8 +50,15 @@ struct ContentView: View {
                 Button("Open Site") {
                     NSWorkspace.shared.open(serverURL)
                 }
-                Example()
-                    .staticSite(inputURL: base, outputURL: out)
+                VSplitView {
+                    Example()
+                        .staticSite(inputURL: base, outputURL: out)
+                        .wrap(serverTask == nil ? .identity as any Template : .liveReload as any Template)
+                        .environment(\.onWrite) {
+                            Reloads.shared.reload(path: $0)
+                        }
+                    ConsoleView()
+                }
             } else {
                 ProgressView()
             }

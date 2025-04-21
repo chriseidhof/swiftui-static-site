@@ -3,6 +3,7 @@ import SwiftUI
 extension EnvironmentValues {
     @Entry var inputURL: URL!
     @Entry var outputURL: URL!
+    @Entry var baseOutputURL: URL!
 }
 
 extension View {

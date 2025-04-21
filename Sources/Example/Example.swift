@@ -26,7 +26,9 @@ struct PostIndex: View {
     var titles: [String] = []
     var body: some View {
         let str = titles.map { "* \($0)"}.joined(separator: "\n")
-        Write(to: "index.html", str.markdown().data)
+        WriteNode("index.html") {
+            str.markdown()
+        }
     }
 }
 

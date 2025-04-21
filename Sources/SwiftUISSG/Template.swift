@@ -32,3 +32,15 @@ extension Node {
 public protocol Template {
     func run(content: Node) -> Node
 }
+
+public struct IdentityTemplate: Template {
+    public func run(content: Node) -> Node {
+        content
+    }
+}
+
+extension Template where Self == IdentityTemplate {
+    public static var identity: Self {
+        .init()
+    }
+}

@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 
 // TODO: Make it possible to construct a file observer through the environmnet
+@MainActor
 protocol FileObserving: Observable, AnyObject {
     var url: URL? { get set }
     var files: [String] { get }
@@ -17,14 +18,14 @@ enum Contents: Hashable, Codable {
 class FSObserver: FileObserving {
     var url: URL? {
         didSet {
-            read()
+            executeRead()
         }
     }
     init() {
         self.url = url
     }
     var contents: Contents = .directory([])
-    var dispatchSource: Any?
+    var dispatchSource: DispatchSourceProtocol?
 
     var files: [String] {
         if case .directory(let list) = contents {
@@ -47,7 +48,17 @@ class FSObserver: FileObserving {
             self.dispatchSource = nil
             return
         }
-        let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: Int32(open(url.path, O_RDONLY)), eventMask: [.all])
+        guard FileManager.default.fileExists(atPath: url.path()) else {
+//            contents = .directory([])
+            print("File removed")
+            return
+        }
+
+        if let d = self.dispatchSource  {
+            d.cancel()
+        }
+
+        let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: Int32(open(url.path, O_RDONLY)), eventMask: [.all], queue: .main)
         dispatchSource.setEventHandler { [unowned self] in
             self.read()
         }
@@ -56,6 +67,14 @@ class FSObserver: FileObserving {
     }
 
     func read() {
+        if Thread.current.isMainThread {
+            executeRead()
+        } else {
+            DispatchQueue.main.async { [weak self] in self?.executeRead() }
+        }
+    }
+
+    func executeRead() {
         guard let url = self.url else {
             contents = .directory([])
             return
