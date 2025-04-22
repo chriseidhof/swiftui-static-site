@@ -8,15 +8,17 @@ public struct Example: View {
     public init() { }
 
     public var body: some View {
-        WriteNode { """
+        VStack(alignment: .leading) {
+            WriteNode { """
         Hello, world
         
         [Blog](/posts)
         """.markdown() }
-        Copy(name: "input.txt")
-        Blog()
-            .wrap(BlogTemplate())
-            .dir("posts")
+            Copy(name: "input.txt")
+            Blog()
+                .wrap(BlogTemplate())
+                .dir("posts")
+        }
     }
 }
 

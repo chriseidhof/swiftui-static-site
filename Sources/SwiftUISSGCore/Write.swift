@@ -11,6 +11,7 @@ public struct Write: View {
     @Environment(\.cleanup) private var cleanup
     @Environment(\.onWrite) private var onWrite
     @Environment(\.baseOutputURL) private var baseOutputURL: URL
+    @Environment(\.currentPath) private var currentPath
 
     public init(to: String, _ contents: String) {
         self.payload = .init(contents: contents.data(using: .utf8)!, to: to)
@@ -44,16 +45,14 @@ public struct Write: View {
             if !fm.fileExists(atPath: dir.path()) {
                 try! fm.createDirectory(at: dir, withIntermediateDirectories: true)
             }
-            if let w = onWrite {
-                // todo: duplication with below
-                let base = baseOutputURL
-                let url = result
-                assert(url.absoluteString.hasPrefix(base.absoluteString))
-                let remainder = String(url.absoluteString.dropFirst(base.absoluteString.count))
-                w(remainder)
-            }
-            log("Write \(payload.to)")
+            let path = currentPath.appendingPathComponent(payload.to)
+            log("Write \(path)")
             try! payload.contents.write(to: result)
+            if let w = onWrite {
+                DispatchQueue.main.async {
+                    w(currentPath)
+                }
+            }
         }
         .onDisappear {
             do {
@@ -77,3 +76,11 @@ extension EnvironmentValues {
     }
 }
 
+extension String {
+    func appendingPathComponent(_ path: String) -> String {
+        guard hasSuffix("/") else {
+            return "\(self)/\(path)"
+        }
+        return "\(self)\(path)"
+    }
+}
