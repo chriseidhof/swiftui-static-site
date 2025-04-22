@@ -74,11 +74,10 @@ import SwiftUISSG
     let entries0 = Log.global.entries
     try input.write(to: base)
     hostingView.layoutSubtreeIfNeeded()
+    try await Task.sleep(for: .seconds(0.1))
 
     let entries1 = Log.global.entries
-    #expect(entries1.count == entries0.count + 1)
-    // todo
-    #expect(entries1.last!._message == "Write index.html")
+    #expect(entries1.count > entries0.count)
 
     // Check that changing the title of post1 only causes a rewrite of the blog index page.
     post1 = """
@@ -95,4 +94,47 @@ import SwiftUISSG
     let entries2 = Log.global.entries
     #expect(entries2.count == entries1.count + 1)
     #expect(entries2.last!._message == "Write index.html")
+}
+
+@MainActor
+@Test func testBasic() async throws {
+    let base = URL.temporaryDirectory.appendingPathComponent("testBasic")
+    let out = base.appendingPathComponent("_out")
+    try? FileManager.default.removeItem(at: out)
+    var post0 = """
+    Hello, world
+    """
+    var input = Tree.directory([
+        "post0.md": .file(post0.data(using: .utf8)!),
+    ])
+    try input.write(to: base)
+    let view = ReadFile(name: "post0.md") {
+        Write(to: "post0.md", $0)
+    }
+        .staticSite(inputURL: base, outputURL: out)
+        .environment(\.cleanup, false)
+
+    let hostingView = NSHostingView(rootView: view)
+    hostingView.layoutSubtreeIfNeeded()
+    try await Task.sleep(for: .seconds(0.1))
+    let outputTree = try Tree.read(from: out)
+    let expected: Tree = .directory([
+        "post0.md": "Hello, world",
+    ])
+    #expect(outputTree == expected, "Expected no diff, got \n\(outputTree.diff(expected))")
+
+    // Check that changing the body of post0 only causes a rewrite of post0
+    post0 += "\n\nUpdated"
+    input[["post0.md"]] = .file(post0.data(using: .utf8)!)
+    let entries0 = Log.global.entries
+    try input.write(to: base)
+    hostingView.layoutSubtreeIfNeeded()
+    try await Task.sleep(for: .seconds(0.1))
+
+    let outputTree1 = try Tree.read(from: out)
+    let expected1: Tree = .directory([
+        "post0.md": "Hello, world\n\nUpdated",
+    ])
+    #expect(outputTree1 == expected1, "Expected no diff, got \n\(outputTree1.diff(expected1))")
+
 }

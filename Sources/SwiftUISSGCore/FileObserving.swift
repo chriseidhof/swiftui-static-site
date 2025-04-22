@@ -59,8 +59,8 @@ class FSObserver: FileObserving {
         }
 
         let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: Int32(open(url.path, O_RDONLY)), eventMask: [.all], queue: .main)
-        dispatchSource.setEventHandler { [unowned self] in
-            self.read()
+        dispatchSource.setEventHandler { [weak self] in
+            self?.read()
         }
         dispatchSource.resume()
         self.dispatchSource = dispatchSource
@@ -68,8 +68,9 @@ class FSObserver: FileObserving {
 
     func read() {
         assert(Thread.current.isMainThread)
+        print("Read", url)
         guard let url = self.url else {
-            contents = .directory([])
+            contents = nil
             return
         }
         setupDispatchSource()
@@ -87,9 +88,7 @@ class FSObserver: FileObserving {
                 contents = newContents
             }
         } catch {
-            DispatchQueue.main.async {
-                log("\(error)")
-            }
+            log("\(error)")
         }
     }
 }
