@@ -54,7 +54,7 @@ struct ProvidesBlogPost: ViewModifier {
     var title: String
     func body(content: Content) -> some View {
         content
-            .preference(key: BlogPostPreference.self, value: [.init(title: title, absolutePath: path)])
+            .preference(key: BlogPostPreference.self, value: [.init(title: title, absolutePath: "/\(path)")])
     }
 }
 

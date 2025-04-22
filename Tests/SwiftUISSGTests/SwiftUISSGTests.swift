@@ -41,8 +41,8 @@ import SwiftUISSG
     <h1>Blog</h1>
     <article>
     \t<ul>
-    \t\t<li><p><a href="/post0/">The first post</a></p></li>
-    \t\t<li><p><a href="/post1/">post1.md</a></p></li>
+    \t\t<li><p><a href="/posts/post0/">The first post</a></p></li>
+    \t\t<li><p><a href="/posts/post1/">post1.md</a></p></li>
     \t</ul>
     </article>
     """
