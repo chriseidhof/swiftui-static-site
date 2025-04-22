@@ -5,7 +5,7 @@ public struct WriteNode: View {
     @NodeBuilder var builder: Node
     @Environment(\.template) var template
     var to: String
-    public init(_ to: String, @NodeBuilder builder: () -> Node) {
+    public init(_ to: String = "index.html", @NodeBuilder builder: () -> Node) {
         self.builder = builder()
         self.to = to
     }

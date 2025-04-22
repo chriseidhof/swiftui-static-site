@@ -8,7 +8,11 @@ public struct Example: View {
     public init() { }
 
     public var body: some View {
-        Write(to: "index.html", "Hello, world")
+        WriteNode { """
+        Hello, world
+        
+        [Blog](/posts)
+        """.markdown() }
         Copy(name: "input.txt")
         Blog()
             .wrap(BlogTemplate())
@@ -23,10 +27,10 @@ extension String {
 }
 
 struct PostIndex: View {
-    var titles: [String] = []
+    var posts: [BlogPostPreference.Payload] = []
     var body: some View {
-        let str = titles.map { "* \($0)"}.joined(separator: "\n")
-        WriteNode("index.html") {
+        let str = posts.map { "* [\($0.title)](\($0.absolutePath))" }.joined(separator: "\n")
+        WriteNode {
             str.markdown()
         }
     }
@@ -34,41 +38,55 @@ struct PostIndex: View {
 
 // As an example, we could propagate up the titles of the blog using preferences (normally, this would be the full metadata). One of the nice things about it is that (for example) the homepage could render these without having to know everything about the blog implementation.
 
-struct BlogTitlesPreference: PreferenceKey {
-    static var defaultValue: [String] { [] }
-    static func reduce(value: inout [String], nextValue: () -> [String]) {
+struct BlogPostPreference: PreferenceKey {
+    struct Payload: Hashable {
+        var title: String
+        var absolutePath: String
+    }
+    static var defaultValue: [Payload] { [] }
+    static func reduce(value: inout [Payload], nextValue: () -> [Payload]) {
         value.append(contentsOf: nextValue())
     }
 }
 
+struct ProvidesBlogPost: ViewModifier {
+    @Environment(\.currentPath) var path
+    var title: String
+    func body(content: Content) -> some View {
+        content
+            .preference(key: BlogPostPreference.self, value: [.init(title: title, absolutePath: path)])
+    }
+}
+
 extension View {
-    func blogPostTitle(_ title: String) -> some View {
-        preference(key: BlogTitlesPreference.self, value: [title])
+    func providesBlogPost(_ title: String) -> some View {
+        modifier(ProvidesBlogPost(title: title))
     }
 
-    func gatherBlogPostTitles(_ onChange: @escaping ([String]) -> Void) -> some View {
-        onPreferenceChange(BlogTitlesPreference.self, perform: onChange)
+    func gatherBlogPosts(_ onChange: @escaping ([BlogPostPreference.Payload]) -> Void) -> some View {
+        onPreferenceChange(BlogPostPreference.self, perform: onChange)
     }
 }
 
 struct Blog: View {
-    @State private var postTitles: [String] = []
+    @State private var posts: [BlogPostPreference.Payload] = []
     var body: some View {
         ReadDir() { files in
-            PostIndex(titles: postTitles)
+            PostIndex(posts: posts)
             ForEach(files, id: \.self) { name in
                 ReadFile(name: name) { contents in
                     let str = String(decoding: contents, as: UTF8.self)
                     let (frontMatter, markdown) = str.parseWithFrontMatter()
-                    WriteNode(name.baseName + ".html") {
+                    WriteNode {
                         markdown.markdown()
                     }
-                    .blogPostTitle(frontMatter ?? name)
+                    .providesBlogPost(frontMatter ?? name)
+                    .outputDir(name.baseName)
                 }
             }
         }
-        .gatherBlogPostTitles {
-            postTitles = $0
+        .gatherBlogPosts {
+            posts = $0
         }
     }
 }

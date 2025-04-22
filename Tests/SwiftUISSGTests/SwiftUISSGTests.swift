@@ -33,31 +33,37 @@ import SwiftUISSG
     hostingView.layoutSubtreeIfNeeded()
     try await Task.sleep(for: .seconds(0.1))
     let outputTree = try Tree.read(from: out)
+    func index(_ string: String) -> Tree {
+        .directory(["index.html": .file(string.data(using: .utf8)!)])
+    }
     let postIndex =
     """
     <h1>Blog</h1>
     <article>
     \t<ul>
-    \t\t<li><p>The first post</p></li>
-    \t\t<li><p>post1.md</p></li>
+    \t\t<li><p><a href="/post0/">The first post</a></p></li>
+    \t\t<li><p><a href="/post1/">post1.md</a></p></li>
     \t</ul>
     </article>
     """
     let expected: Tree = .directory([
         "input.txt": "Input file",
-        "index.html": "Hello, world",
+        "index.html": """
+        <p>Hello, world</p>
+        <p><a href="/posts">Blog</a></p>
+        """,
         "posts": Tree.directory([
             "index.html": .file(postIndex.data(using: .utf8)!),
-            "post1.html": """
+            "post1": index("""
             <h1>Blog</h1>
             <article>
             \t<p><strong>Post 1</strong></p>
             </article>
-            """,
-            "post0.html": """
+            """),
+            "post0": index("""
             <h1>Blog</h1>
             <article><h1>Post 0</h1></article>
-            """
+            """)
          ])
     ])
     #expect(outputTree == expected, "Expected no diff, got \n\(outputTree.diff(expected))")
@@ -71,7 +77,8 @@ import SwiftUISSG
 
     let entries1 = Log.global.entries
     #expect(entries1.count == entries0.count + 1)
-    #expect(entries1.last!._message == "Write post0.html")
+    // todo
+    #expect(entries1.last!._message == "Write index.html")
 
     // Check that changing the title of post1 only causes a rewrite of the blog index page.
     post1 = """

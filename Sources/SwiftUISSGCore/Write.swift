@@ -45,6 +45,7 @@ public struct Write: View {
                 try! fm.createDirectory(at: dir, withIntermediateDirectories: true)
             }
             if let w = onWrite {
+                // todo: duplication with below
                 let base = baseOutputURL
                 let url = result
                 assert(url.absoluteString.hasPrefix(base.absoluteString))
@@ -64,6 +65,15 @@ public struct Write: View {
                 log("\(error)")
             }
         }
+    }
+}
+
+extension EnvironmentValues {
+    public var currentPath: String {
+        let base = baseOutputURL!
+        let url = outputURL!
+        assert(url.absoluteString.hasPrefix(base.absoluteString))
+        return String(url.absoluteString.dropFirst(base.absoluteString.count))
     }
 }
 
