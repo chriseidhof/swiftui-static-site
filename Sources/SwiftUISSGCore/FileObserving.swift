@@ -18,13 +18,13 @@ enum Contents: Hashable, Codable {
 class FSObserver: FileObserving {
     var url: URL? {
         didSet {
-            executeRead()
+            read()
         }
     }
     init() {
         self.url = url
     }
-    var contents: Contents = .directory([])
+    var contents: Contents? = nil // not read
     var dispatchSource: DispatchSourceProtocol?
 
     var files: [String] {
@@ -67,14 +67,7 @@ class FSObserver: FileObserving {
     }
 
     func read() {
-        if Thread.current.isMainThread {
-            executeRead()
-        } else {
-            DispatchQueue.main.async { [weak self] in self?.executeRead() }
-        }
-    }
-
-    func executeRead() {
+        assert(Thread.current.isMainThread)
         guard let url = self.url else {
             contents = .directory([])
             return
@@ -86,7 +79,7 @@ class FSObserver: FileObserving {
             fm.fileExists(atPath: url.path(), isDirectory: &isDirectory)
             let newContents: Contents
             if isDirectory.boolValue {
-                newContents = Contents.directory(try fm.contentsOfDirectory(atPath: url.path))
+                newContents = Contents.directory(try fm.contentsOfDirectory(atPath: url.path).sorted())
             } else {
                 newContents = .file(try Data(contentsOf: url))
             }

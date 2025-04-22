@@ -2,6 +2,7 @@ import Testing
 import Foundation
 import Example
 import SwiftUI
+import SwiftUISSG
 @testable import SwiftUISSGCore
 
 @MainActor
@@ -34,10 +35,13 @@ import SwiftUI
     let outputTree = try Tree.read(from: out)
     let postIndex =
     """
-    <ul>
-    \t<li><p>The first post</p></li>
-    \t<li><p>post1.md</p></li>
-    </ul>
+    <h1>Blog</h1>
+    <article>
+    \t<ul>
+    \t\t<li><p>The first post</p></li>
+    \t\t<li><p>post1.md</p></li>
+    \t</ul>
+    </article>
     """
     let expected: Tree = .directory([
         "input.txt": "Input file",
