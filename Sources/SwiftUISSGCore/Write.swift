@@ -78,7 +78,7 @@ extension EnvironmentValues {
 
 extension String {
     func appendingPathComponent(_ path: String) -> String {
-        guard hasSuffix("/") else {
+        guard isEmpty || hasSuffix("/") else {
             return "\(self)/\(path)"
         }
         return "\(self)\(path)"
