@@ -68,7 +68,6 @@ class FSObserver: FileObserving {
 
     func read() {
         assert(Thread.current.isMainThread)
-        print("Read", url)
         guard let url = self.url else {
             contents = nil
             return

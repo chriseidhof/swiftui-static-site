@@ -121,7 +121,11 @@ extension Tree {
             guard case .directory(var dictionary) = self else {
                 fatalError()
             }
-            dictionary[f]![Array(path.dropFirst())] = newValue
+            if path.count == 1 {
+                dictionary[f] = newValue
+            } else {
+                dictionary[f]![Array(path.dropFirst())] = newValue
+            }
             self = .directory(dictionary)
         }
     }

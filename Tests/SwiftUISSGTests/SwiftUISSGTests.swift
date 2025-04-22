@@ -92,8 +92,8 @@ import SwiftUISSG
     hostingView.layoutSubtreeIfNeeded()
     try await Task.sleep(for: .seconds(0.1)) // for the preference
     let entries2 = Log.global.entries
-    #expect(entries2.count == entries1.count + 1)
-    #expect(entries2.last!._message == "Write index.html")
+    #expect(entries2.count == entries1.count + 2)
+    #expect(entries2.last!._message == "Write posts/index.html")
 }
 
 @MainActor
@@ -137,4 +137,42 @@ import SwiftUISSG
     ])
     #expect(outputTree1 == expected1, "Expected no diff, got \n\(outputTree1.diff(expected1))")
 
+}
+
+@MainActor
+@Test func testDir() async throws {
+    let base = URL.temporaryDirectory.appendingPathComponent("testDir")
+    let out = base.appendingPathComponent("_out")
+    NSWorkspace.shared.open(base)
+    try? FileManager.default.removeItem(at: base)
+    var input = Tree.directory([
+        "post0.md": .file("0".data(using: .utf8)!),
+        "post1.md": .file("1".data(using: .utf8)!),
+    ])
+    try input.write(to: base)
+    let view = ReadDir {
+        Write(to: "files.md", $0.joined(separator: ","))
+    }
+        .staticSite(inputURL: base, outputURL: out)
+        .environment(\.cleanup, false)
+
+    let hostingView = NSHostingView(rootView: view)
+    hostingView.layoutSubtreeIfNeeded()
+    try await Task.sleep(for: .seconds(0.1))
+    let outputTree = try Tree.read(from: out)
+    let expected: Tree = .directory([
+        "files.md": "_out,post0.md,post1.md",
+    ])
+    #expect(outputTree == expected, "Expected no diff, got \n\(outputTree.diff(expected))")
+
+    input[["post2.md"]] = .file("3".data(using: .utf8)!)
+    try input.write(to: base)
+    hostingView.layoutSubtreeIfNeeded()
+    try await Task.sleep(for: .seconds(0.1))
+
+    let outputTree1 = try Tree.read(from: out)
+    let expected1: Tree = .directory([
+        "files.md": "_out,post0.md,post1.md,post2.md",
+    ])
+    #expect(outputTree1 == expected1, "Expected no diff, got \n\(outputTree1.diff(expected1))")
 }
