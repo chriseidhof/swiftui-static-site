@@ -4,16 +4,18 @@ import Swim
 import HTML
 
 // An example static site.
-public struct Example: View {
+public struct Example: Rule {
     public init() { }
 
-    public var body: some View {
+    public var body: some Rule {
         VStack(alignment: .leading) {
-            WriteNode { """
-        Hello, world
-        
-        [Blog](/posts)
-        """.markdown() }
+            WriteNode {
+                """
+                Hello, world
+                
+                [Blog](/posts)
+                """.markdown()
+            }
             Copy(name: "input.txt")
             Blog()
                 .wrap(BlogTemplate())
@@ -28,9 +30,9 @@ extension String {
     }
 }
 
-struct PostIndex: View {
+struct PostIndex: Rule {
     var posts: [BlogPostPreference.Payload] = []
-    var body: some View {
+    var body: some Rule {
         let str = posts.map { "* [\($0.title)](\($0.absolutePath))" }.joined(separator: "\n")
         WriteNode {
             str.markdown()
@@ -51,33 +53,32 @@ struct BlogPostPreference: PreferenceKey {
     }
 }
 
-struct ProvidesBlogPost: ViewModifier {
+struct ProvidesBlogPost: RuleModifier {
     @Environment(\.currentPath) var path
     var title: String
-    func body(content: Content) -> some View {
+    func body(content: Content) -> some Rule {
         content
             .preference(key: BlogPostPreference.self, value: [.init(title: title, absolutePath: "/\(path)")])
     }
 }
 
-extension View {
-    func providesBlogPost(_ title: String) -> some View {
+extension Rule {
+    func providesBlogPost(_ title: String) -> some Rule {
         modifier(ProvidesBlogPost(title: title))
     }
 
-    func gatherBlogPosts(_ onChange: @escaping ([BlogPostPreference.Payload]) -> Void) -> some View {
+    func gatherBlogPosts(_ onChange: @escaping ([BlogPostPreference.Payload]) -> Void) -> some Rule {
         onPreferenceChange(BlogPostPreference.self, perform: onChange)
     }
 }
 
-struct Blog: View {
+struct Blog: Rule {
     @State private var posts: [BlogPostPreference.Payload] = []
-    var body: some View {
+    var body: some Rule {
         ReadDir() { files in
             PostIndex(posts: posts)
             ForEach(files, id: \.self) { name in
-                ReadFile(name: name) { contents in
-                    let str = String(decoding: contents, as: UTF8.self)
+                ReadFile(name: name) { str in
                     let (frontMatter, markdown) = str.parseWithFrontMatter()
                     WriteNode {
                         markdown.markdown()
@@ -87,9 +88,7 @@ struct Blog: View {
                 }
             }
         }
-        .gatherBlogPosts {
-            posts = $0
-        }
+        .gatherBlogPosts { posts = $0 }
     }
 }
 

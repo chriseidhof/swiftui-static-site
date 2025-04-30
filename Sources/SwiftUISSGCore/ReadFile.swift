@@ -11,6 +11,13 @@ public struct ReadFile<Contents: View>: View {
         self.contents = contents
     }
 
+    public init(name: String, @ViewBuilder contents: @escaping (String) -> Contents) {
+        self.name = name
+        self.contents = { data in
+            contents(String(decoding: data, as: UTF8.self))
+        }
+    }
+
     var theData: Data {
         guard let d = observer.data else {
             if didAppear {

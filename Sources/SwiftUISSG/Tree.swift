@@ -140,9 +140,9 @@ extension String {
         let result: [String] = diff.map { change -> String in
             switch change {
 
-            case .insert(offset: let offset, element: let element, associatedWith: let associatedWith):
+            case .insert(offset: let offset, element: let element, associatedWith: _):
                 return "+[\(offset)]: \(String(element))"
-            case .remove(offset: let offset, element: let element, associatedWith: let associatedWith):
+            case .remove(offset: let offset, element: let element, associatedWith: _):
                 return "-[\(offset)]: \(String(element))"
             }
         }

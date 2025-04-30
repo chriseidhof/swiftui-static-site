@@ -41,6 +41,10 @@ let package = Package(
             "SwiftUISSG",
             .product(name: "Yams", package: "yams")
         ]),
+        .target(name: "MinimalExample", dependencies: [
+            "SwiftUISSG",
+//            .product(name: "Yams", package: "yams")
+        ]),
         .executableTarget(name: "GUI", dependencies: [
             "LiveReload",
             "Example",

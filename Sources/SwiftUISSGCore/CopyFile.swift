@@ -9,7 +9,7 @@ public struct Copy: View {
     // TODO: this would be more efficient if we actually copy the file.
     public var body: some View {
         ReadFile(name: name) {
-            Write(to: name, $0)
+            Write(to: name, $0 as Data)
         }
     }
 }

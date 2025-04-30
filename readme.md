@@ -1,7 +1,6 @@
-
 # The Worst Static Site Generator In The World
 
-One of the best thing about static site generators is that they run in the terminal. Also, you can easily build your own with no or few dependencies.
+One of the best thing about static site generators is that they typically run with very few dependencies (and definitely not closed-source GUI frameworks as a dependency).
 
 This static site generator has a *massive* dependency on SwiftUI and can't run without it.
 
