@@ -18,12 +18,12 @@ enum Contents: Hashable, Codable {
 class FSObserver: FileObserving {
     var url: URL? {
         didSet {
-            read()
+            setupDispatchSource()
         }
     }
-    init() {
-        self.url = url
-    }
+
+    init() { }
+
     var contents: Contents? = nil // not read
     var dispatchSource: DispatchSourceProtocol?
 
@@ -44,26 +44,35 @@ class FSObserver: FileObserving {
 
     func setupDispatchSource() {
         // not very efficient, recreating dispatch source on any change
+        self.dispatchSource?.cancel()
+        self.dispatchSource = nil
+
         guard let url = self.url else {
-            self.dispatchSource = nil
             return
         }
-        guard FileManager.default.fileExists(atPath: url.path()) else {
-//            contents = .directory([])
-            print("File removed")
-            return
-        }
+        let fd = open(url.path(percentEncoded: false), O_RDONLY)
+        guard fd != -1 else { return }
 
-        if let d = self.dispatchSource  {
-            d.cancel()
-        }
-
-        let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: Int32(open(url.path, O_RDONLY)), eventMask: [.all], queue: .main)
+        let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.all], queue: .main)
         dispatchSource.setEventHandler { [weak self] in
-            self?.read()
+            self?.handle(event: dispatchSource.data)
         }
+        dispatchSource.setCancelHandler {
+            close(fd)
+        }
+        read()
         dispatchSource.resume()
         self.dispatchSource = dispatchSource
+    }
+
+    func handle(event: DispatchSource.FileSystemEvent) {
+        if event.contains(.write) {
+            read()
+        } else if event.contains(.delete) {
+            setupDispatchSource()
+        } else {
+            print("Other", event)
+        }
     }
 
     func read() {
@@ -72,7 +81,7 @@ class FSObserver: FileObserving {
             contents = nil
             return
         }
-        setupDispatchSource()
+        print("Rereading", url.path(percentEncoded: false))
         let fm = FileManager.default
         do {
             var isDirectory: ObjCBool = false
