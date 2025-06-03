@@ -1,46 +1,21 @@
 import Foundation
 import SwiftUI
 
-// TODO: Make it possible to construct a file observer through the environmnet
-@MainActor
-protocol FileObserving: Observable, AnyObject {
-    var url: URL? { get set }
-    var files: [String] { get }
-    var data: Data? { get }
-}
-
-enum Contents: Hashable, Codable {
-    case file(Data)
-    case directory([String])
-}
-
 @Observable
-class FSObserver: FileObserving {
+class FSObserver<Content> {
     var url: URL? {
         didSet {
             setupDispatchSource()
         }
     }
+    let read: (URL) -> Content?
 
-    init() { }
+    init(read: @escaping (URL) -> Content?) {
+        self.read = read
+    }
 
-    var contents: Contents? = nil // not read
+    var contents: Content? = nil // not read
     var dispatchSource: DispatchSourceProtocol?
-
-    var files: [String] {
-        if case .directory(let list) = contents {
-            return list
-        } else {
-            return []
-        }
-    }
-
-    var data: Data? {
-        if case .file(let data) = contents {
-            return data
-        }
-        return nil
-    }
 
     func setupDispatchSource() {
         // not very efficient, recreating dispatch source on any change
@@ -50,7 +25,7 @@ class FSObserver: FileObserving {
         guard let url = self.url else {
             return
         }
-        let fd = open(url.path(percentEncoded: false), O_RDONLY)
+        let fd = open(url.path(percentEncoded: false), O_EVTONLY)
         guard fd != -1 else { return }
 
         let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.all], queue: .main)
@@ -60,14 +35,14 @@ class FSObserver: FileObserving {
         dispatchSource.setCancelHandler {
             close(fd)
         }
-        read()
+        readHelper()
         dispatchSource.resume()
         self.dispatchSource = dispatchSource
     }
 
     func handle(event: DispatchSource.FileSystemEvent) {
         if event.contains(.write) {
-            read()
+           readHelper()
         } else if event.contains(.delete) {
             setupDispatchSource()
         } else {
@@ -75,28 +50,37 @@ class FSObserver: FileObserving {
         }
     }
 
-    func read() {
+    func readHelper() {
         assert(Thread.current.isMainThread)
         guard let url = self.url else {
             contents = nil
             return
         }
-        print("Rereading", url.path(percentEncoded: false))
-        let fm = FileManager.default
-        do {
-            var isDirectory: ObjCBool = false
-            fm.fileExists(atPath: url.path(), isDirectory: &isDirectory)
-            let newContents: Contents
-            if isDirectory.boolValue {
-                newContents = Contents.directory(try fm.contentsOfDirectory(atPath: url.path).sorted())
-            } else {
-                newContents = .file(try Data(contentsOf: url))
-            }
-            if newContents != contents {
-                contents = newContents
-            }
-        } catch {
-            log("\(error)")
+        contents = read(url)
+    }
+}
+
+public struct DirectoryContents: Codable, Hashable {
+    public var files: [String]
+    public init(files: [String]) {
+        self.files = files
+    }
+}
+
+extension FSObserver where Content == DirectoryContents {
+    convenience init() {
+        self.init { url in
+            let fm = FileManager.default
+            let files = (try? fm.contentsOfDirectory(atPath: url.path))?.sorted() ?? []
+            return DirectoryContents(files: files)
+        }
+    }
+}
+
+extension FSObserver where Content == Data {
+    convenience init() {
+        self.init { url in
+            try? Data(contentsOf: url)
         }
     }
 }

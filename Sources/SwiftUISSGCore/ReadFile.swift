@@ -3,7 +3,7 @@ import SwiftUI
 public struct ReadFile<Contents: View>: View {
     var name: String
     var contents: (Data) -> Contents
-    @State var observer = FSObserver()
+    @State var observer = FSObserver<Data>()
     @State private var didAppear = false
     @Environment(\.inputURL) var inputURL: URL
     public init(name: String, @ViewBuilder contents: @escaping (Data) -> Contents) {
@@ -19,7 +19,7 @@ public struct ReadFile<Contents: View>: View {
     }
 
     var theData: Data {
-        guard let d = observer.data else {
+        guard let d = observer.contents else {
             if didAppear {
                 print("No such file: \(name) (\(inputURL))")
             }

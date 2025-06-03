@@ -6,7 +6,7 @@ import Observation
 public struct ReadDir<Contents: View>: View {
     var name: String?
     var contents: ([String]) -> Contents
-    @State private var observer = FSObserver()
+    @State private var observer = FSObserver<DirectoryContents>()
     @Environment(\.inputURL) var inputURL: URL
     public init(name: String? = nil, @ViewBuilder contents: @escaping ([String]) -> Contents) {
         self.name = name
@@ -20,7 +20,7 @@ public struct ReadDir<Contents: View>: View {
     public var body: some View {
         let theName = theURL.lastPathComponent
         LabeledContent("Read Dir \(theName)") {
-            contents(observer.files.filter { !$0.hasPrefix(".") })
+            contents(observer.contents?.files.filter { !$0.hasPrefix(".") } ?? [])
         }
         .sideEffect(trigger: theURL) {
             observer.url = theURL
