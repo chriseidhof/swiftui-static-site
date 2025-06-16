@@ -20,16 +20,18 @@ extension Template where Self == LiveReloadTemplate {
 
 
 public struct GUIView<Site: Rule>: View {
-    public init(site: Site, base: URL, out: URL? = nil) {
+    public init(site: Site, base: URL, out: URL? = nil, startServer: Bool = false) {
         self.site = site
         self.base = base
         self.out = out ?? base.appending(component: "_out")
+        self.startServer = startServer
     }
 
     @ViewBuilder private var site: Site
     @State private var serverTask: Task<Void, Never>? = nil
     var base = URL.temporaryDirectory.appendingPathComponent("app")
     var out: URL
+    var startServer: Bool = false
     public var body: some View {
         VStack(alignment: .leading) {
             VSplitView {
@@ -56,24 +58,36 @@ public struct GUIView<Site: Rule>: View {
         Button("Directory") {
             NSWorkspace.shared.open(base)
         }
-        Button(serverTask == nil ? "Start Server" : "Stop Server") {
+        Button {
             if serverTask == nil {
-                serverTask = Task {
-                    await withDiscardingTaskGroup { group in
-                        group.addTask {
-                            try! await runServer(baseURL: out)
-                        }
-                        group.addTask {
-                            try! await liveReload()
-                        }
-                    }
-                }
+                startServerHelper()
             } else {
                 serverTask = nil
             }
+        } label: {
+            let started = serverTask != nil
+            Label(started ? "Stop Server" : "Start Server", systemImage: started ? "stopfill" : "play")
         }
+        .labelStyle(.titleAndIcon)
         Button("Open Site") {
             NSWorkspace.shared.open(serverURL)
         }
     }
+
+    func startServerHelper() {
+        serverTask = Task {
+            await withDiscardingTaskGroup { group in
+                group.addTask {
+                    try! await runServer(baseURL: out)
+                }
+                group.addTask {
+                    try! await liveReload()
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    GUIView(site: Text(""), base: URL.temporaryDirectory)
 }
