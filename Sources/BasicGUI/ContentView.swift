@@ -50,6 +50,11 @@ public struct GUIView<Site: Rule>: View {
             .toolbar {
                 toolbarContent
             }
+            .onAppear {
+                if startServer && serverTask == nil {
+                    startServerHelper()
+                }
+            }
         }
     }
 
