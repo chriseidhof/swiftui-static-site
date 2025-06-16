@@ -40,4 +40,3 @@ public struct ReadFile<Contents: View>: View {
         }
     }
 }
-

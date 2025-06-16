@@ -16,6 +16,7 @@ let package = Package(
         .library(
             name: "SwiftUISSG",
             targets: ["SwiftUISSG"]),
+        .library(name: "BasicGUI", targets: ["BasicGUI"]),
         .library(name: "Example", targets: ["Example"])
     ],
     dependencies: [
@@ -45,9 +46,14 @@ let package = Package(
             "SwiftUISSG",
 //            .product(name: "Yams", package: "yams")
         ]),
+        .target(name: "BasicGUI", dependencies: [
+            "LiveReload",
+            "SwiftUISSG",
+        ]),
         .executableTarget(name: "GUI", dependencies: [
             "LiveReload",
             "Example",
+            "BasicGUI",
         ]),
         .testTarget(
             name: "SwiftUISSGTests",

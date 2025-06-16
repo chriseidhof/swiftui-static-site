@@ -14,11 +14,10 @@ class FSObserver<Content> {
         self.read = read
     }
 
-    var contents: Content? = nil // not read
+    var contents: Content? = nil // nil = not read
     var dispatchSource: DispatchSourceProtocol?
 
     func setupDispatchSource() {
-        // not very efficient, recreating dispatch source on any change
         self.dispatchSource?.cancel()
         self.dispatchSource = nil
 
