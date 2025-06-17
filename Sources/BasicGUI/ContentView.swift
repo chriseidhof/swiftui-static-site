@@ -6,7 +6,7 @@ import Swim
 
 public struct LiveReloadTemplate: Template {
     @NodeBuilder
-    public func run(content: Node) -> Node {
+    public func run(content: Node, environment: EnvironmentValues) -> Node {
         content
         Node.raw(liveReloadSnippet)
     }

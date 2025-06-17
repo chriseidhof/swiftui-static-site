@@ -24,17 +24,17 @@ extension View {
 }
 
 extension Node {
-    func apply(_ templates: [Template]) -> Node {
-        templates.reversed().reduce(self) { $1.run(content: $0) }
+    func apply(_ templates: [Template], environment: EnvironmentValues) -> Node {
+        templates.reversed().reduce(self) { $1.run(content: $0, environment: environment) }
     }
 }
 
 public protocol Template {
-    func run(content: Node) -> Node
+    func run(content: Node, environment: EnvironmentValues) -> Node
 }
 
 public struct IdentityTemplate: Template {
-    public func run(content: Node) -> Node {
+    public func run(content: Node, environment: EnvironmentValues) -> Node {
         content
     }
 }

@@ -94,7 +94,7 @@ struct Blog: Rule {
 
 struct BlogTemplate: Template {
     @NodeBuilder
-    func run(content: Node) -> Node {
+    func run(content: Node, environment: EnvironmentValues) -> Node {
         h1 { %"Blog"% }
         article { content }
     }
